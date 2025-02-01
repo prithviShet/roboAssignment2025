@@ -1,0 +1,7 @@
+package com.robosoft.newsapplication
+
+interface Platform {
+    val name: String
+}
+
+expect fun getPlatform(): Platform
