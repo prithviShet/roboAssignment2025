@@ -1,5 +1,6 @@
 package com.robosoft.newsapplication.component
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Button
@@ -21,6 +23,7 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -37,23 +40,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.robosoft.newsapplication.R
-import com.robosoft.newsapplication.model.Article
-import com.robosoft.newsapplication.model.ArticleRepository
 import com.robosoft.newsapplication.navigation.NavScreen
+import com.robosoft.newsapplication.network.data.model.Article
+import com.robosoft.newsapplication.network.data.repo.ArticleRepository
 
 
 @Composable
-fun ArticleListScreen(articles: List<Article>, navController: NavController) {
+fun ArticleListScreen(
+    articles: List<Article>,
+    navController: NavController,
+    listState: LazyListState
+) {
     val filters = listOf("Author", "Category", "Article Type", "Tag")
 
     Scaffold(
@@ -62,7 +72,18 @@ fun ArticleListScreen(articles: List<Article>, navController: NavController) {
                 title = { Text("Robo News") },
                 backgroundColor = Color.Black,
                 contentColor = Color.White,
-                elevation = 10.dp
+                elevation = 10.dp,
+                navigationIcon = {
+                    val context = LocalContext.current
+                    IconButton(onClick = {
+                        (context as? Activity)?.finish()
+                    }) {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.back_arrow),
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
         },
     ) { padding ->
@@ -74,7 +95,8 @@ fun ArticleListScreen(articles: List<Article>, navController: NavController) {
             FilterSection(
                 onTagSelected = { tag, who ->
                     navController.navigate("${NavScreen.ArticleListScreen.route}/$tag/$who")
-                }, availableTags = filters
+                }, availableTags = filters,
+                listState = listState
             )
             ArticleList(articles, navController)
         }
@@ -84,9 +106,11 @@ fun ArticleListScreen(articles: List<Article>, navController: NavController) {
 @Composable
 fun FilterSection(
     onTagSelected: (String, Int) -> Unit,
-    availableTags: List<String>
+    availableTags: List<String>,
+    listState: LazyListState
 ) {
     LazyRow(
+        state = listState,
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
@@ -207,18 +231,23 @@ fun ArticleItem(article: Article, onArticleClick: () -> Unit) {
                     ?: "https://images.unsplash.com/photo-1584395630827-860eee694d7b?ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80\n"
             )
             Column(
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(horizontal = 10.dp),
+                horizontalAlignment = Alignment.Start
             ) {
                 Text(
                     text = "${article.title} - ${article.id}",
                     style = MaterialTheme.typography.h6,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Start,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = article.subtitle,
+                    text = article.subtitle ?: "",
                     style = MaterialTheme.typography.body2,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Start,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)

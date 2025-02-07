@@ -3,7 +3,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.robosoft.newsapplication.model.Article
+import com.robosoft.newsapplication.network.data.model.Article
 
 @Composable
 fun AuthorTextWithPopup(article: Article) {
@@ -30,7 +29,10 @@ fun AuthorTextWithPopup(article: Article) {
     Text(
         text = "Author: ${article.author}",
         style = MaterialTheme.typography.h5,
-        modifier = Modifier.clickable { showDialog = true }
+        color = MaterialTheme.colors.onPrimary,
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .clickable { showDialog = true }
     )
 
     if (showDialog) {
